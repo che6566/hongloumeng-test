@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鍋囧浣犻噸鐢熷埌銆婄孩妤兼ⅵ銆嬶紝浣犳槸鍝釜浜虹墿锛?/title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "寰蒋闆呴粦", "PingFang SC", sans-serif;
+    background: linear-gradient(135deg, #f5e6d3 0%, #f0d9c0 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #fffdf9;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(120,60,20,0.15);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+    color: #fff;
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .header h1 { font-size: 22px; margin-bottom: 6px; letter-spacing: 2px; }
+  .header p { font-size: 14px; opacity: 0.85; }
+
+  .progress-bar {
+    height: 4px;
+    background: #e8d5c0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #c0392b, #e74c3c);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-text {
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+    color: #8B6914;
+    background: #faf3e8;
+  }
+
+  .page { display: none; padding: 24px; }
+  .page.active { display: block; }
+
+  .question-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #5a3e1b;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 2px solid #e8d5c0;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 15px;
+    color: #4a3520;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .option:hover { border-color: #c0392b; background: #fef6f0; }
+  .option.selected { border-color: #c0392b; background: #fdedec; font-weight: bold; }
+  .option .opt-label {
+    display: inline-block;
+    width: 28px; height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+    background: #e8d5c0;
+    color: #5a3e1b;
+    font-weight: bold;
+    margin-right: 10px;
+    transition: all 0.2s;
+  }
+  .option.selected .opt-label { background: #c0392b; color: #fff; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-prev { background: #e8d5c0; color: #5a3e1b; }
+  .btn-prev:hover { background: #d4c0a8; }
+  .btn-next { background: #c0392b; color: #fff; }
+  .btn-next:hover { background: #a93226; }
+  .btn-next:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-submit { background: #8B4513; color: #fff; }
+  .btn-submit:hover { background: #6B3410; }
+
+  /* Result page */
+  .result-page { padding: 32px 24px; text-align: center; }
+  .result-character {
+    font-size: 48px;
+    font-weight: bold;
+    color: #c0392b;
+    margin: 16px 0 8px;
+    letter-spacing: 4px;
+  }
+  .result-title {
+    font-size: 18px;
+    color: #5a3e1b;
+    margin-bottom: 20px;
+  }
+  .result-tags {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .tag {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    background: #fdedec;
+    color: #c0392b;
+    border: 1px solid #f5c6c2;
+  }
+  .result-body {
+    text-align: left;
+    background: #faf3e8;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 16px;
+    line-height: 1.8;
+    color: #4a3520;
+    font-size: 14.5px;
+  }
+  .result-body h3 {
+    color: #8B4513;
+    margin: 14px 0 6px;
+    font-size: 15px;
+  }
+  .result-body h3:first-child { margin-top: 0; }
+  .quote {
+    font-style: italic;
+    color: #8B4513;
+    border-left: 3px solid #c0392b;
+    padding-left: 12px;
+    margin: 12px 0;
+  }
+  .btn-restart {
+    margin-top: 24px;
+    padding: 12px 36px;
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .btn-restart:hover { background: #a93226; }
+
+  .cover-page { text-align: center; padding: 48px 24px; }
+  .cover-page h2 { color: #8B4513; font-size: 20px; margin-bottom: 12px; }
+  .cover-page p { color: #7a5a3a; line-height: 1.8; font-size: 14px; margin-bottom: 8px; }
+  .btn-start {
+    margin-top: 28px;
+    padding: 14px 48px;
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    cursor: pointer;
+    letter-spacing: 2px;
+  }
+  .btn-start:hover { background: #a93226; }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+
+  <!-- Cover -->
+  <div class="page active" id="page-cover">
+    <div class="header">
+      <h1>馃帇 绾㈡ゼ姊β烽噸鐢熶汉鏍兼祴璇?/h1>
+      <p>鍋囧浣犻噸鐢熷埌銆婄孩妤兼ⅵ銆嬶紝浣犳槸鍝釜浜虹墿锛?/p>
+    </div>
+    <div class="cover-page">
+      <p>鍏?<strong>15 棰?/strong>锛屽嚟绗竴鐩磋閫夋嫨</p>
+      <p>鍋氬畬绔嬪嵆鍑虹粨鏋滐紝鏃犻渶鍙戦€佺瓟妗?/p>
+      <p style="margin-top:16px; color:#8B4513; font-size:13px;">鏈祴璇曚负濞变箰鎬ц川锛屼汉鐗╁垎鏋愬弬鑰冦€婄孩妤兼ⅵ銆嬪師钁楁€ф牸璁惧畾</p>
+      <button class="btn-start" onclick="startTest()">寮€濮嬫祴璇?/button>
+    </div>
+  </div>
+
+  <!-- Quiz pages injected by JS -->
+  <div id="quiz-container"></div>
+
+  <!-- Result -->
+  <div class="page" id="page-result">
+    <div class="header">
+      <h1>馃帀 娴嬭瘯缁撴灉</h1>
+      <p>浣犵殑銆婄孩妤兼ⅵ銆嬩汉鏍兼槸鈥︹€?/p>
+    </div>
+    <div class="result-page" id="result-content"></div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  { q: "绗竴棰橈綔瀹舵棌闀胯緢缁欎綘瀹夋帓浜嗗浜嬶紝瀵规柟闂ㄥ綋鎴峰浣嗕綘娌℃劅瑙夛紝浣犳€庝箞鍔烇紵", opts: ["鐩存帴鎷掔粷锛屾垜鐨勪汉鐢熸垜璇翠簡绠?, "琛ㄩ潰搴旀壙锛岀涓嬫兂鍔炴硶鍖栬В", "榛橀粯鎺ュ彈锛屽閲屽畨鎺掔殑涓嶄細閿?, "瑁呯梾鎷栧欢锛岀敤鎵嬫璁╁鏂归€€濠?] },
+  { q: "绗簩棰橈綔浣犳渶鏃犳硶蹇嶅彈鐨勪簨鏄粈涔堬紵", opts: ["铏氫吉鍜屽仛浣滐紝浜哄墠涓€濂椾汉鍚庝竴濂?, "琚瑙ｃ€佽鍐ゆ瀴锛屾垜鐨勭湡蹇冨埆浜虹湅涓嶅埌", "娣蜂贡鍜屾棤鑳斤紝浜嬫儏娌℃湁鏉＄悊鏈€鐥涜嫤", "琚交瑙嗐€佽蹇借锛屾垜鐨勪环鍊煎拰鎵嶅崕寰椾笉鍒拌鍙?] },
+  { q: "绗笁棰橈綔澶ц鍥噷鍔炶瘲绀撅紝浣犵殑璇楀啓寰椾竴鑸絾澶у閮藉じ浣狅紝鍐呭績鐪熷疄鎯虫硶鏄紵", opts: ["鏃犳墍璋擄紝鎴戞湰鏉ュ氨涓嶇█缃曡繖浜涜櫄鍚?, "鏈夌偣闅捐繃锛屼粬浠槸鍦ㄥ畨鎱版垜鍚?, "鏆楄嚜璁颁笅璋佸じ寰楃湡璇氥€佽皝鍙槸搴斾粯", "涓嶄互涓烘剰锛屾垜鏈氨涓嶅湪涔庤繖浜涗汉鎬庝箞鐪嬫垜"] },
+  { q: "绗洓棰橈綔鏈€濂界殑鏈嬪弸閬亣浜嗗法澶у彉鏁咃紝浣犱細锛?, opts: ["涓嶉【涓€鍒囧幓闄猅A锛屽摢鎬曚唬浠峰緢澶т篃鍦ㄦ墍涓嶆儨", "鏆椾腑鎺ユ祹鍜屽府鍔╋紝浣嗕笉璁╁浜虹湅鍑哄叧绯诲お杩?, "甯紝浣嗚鏉冭　鍒╁紛锛屼笉鑳芥妸鑷繁鎼繘鍘?, "鎰ゆ劋涓嶅钩鎯虫浛TA鍑哄ご锛屼絾鏈€鍚庡彂鐜版棤鑳戒负鍔?] },
+  { q: "绗簲棰橈綔浣犳渶鐪嬮噸鏈嬪弸韬笂鐨勫摢绉嶅搧璐紵", opts: ["鐪熲€斺€斾笉瑁咃紝鏈変粈涔堣浠€涔?, "鎳傗€斺€斾笉鐢ㄨВ閲婂氨鑳界悊瑙ｆ垜", "绋斥€斺€旀湁TA鍦紝浠€涔堜簨閮借兘鎽嗗钩", "鐑堚€斺€旀湁鑴炬皵銆佹湁妫辫锛屼笉闅忔尝閫愭祦"] },
+  { q: "绗叚棰橈綔鏈変汉褰撲紬璁╀綘涓嬩笉鏉ュ彴锛屼綘浜嬪悗浼氾紵", opts: ["涓嶅湪鎰忥紝杞ご灏卞繕浜?, "寰堥毦杩囷紝韬茶捣鏉ュ伔鍋峰摥", "璁板湪蹇冮噷锛屾壘涓悎閫傜殑鏃舵満杩樺洖鍘?, "褰撳満灏辨€煎洖鍘伙紝缁濅笉蹇?] },
+  { q: "绗竷棰橈綔濡傛灉娉ㄥ畾瑕佸け鍘绘渶鐝嶈吹鐨勪笢瑗匡紝浣犲笇鏈涙€庝箞闈㈠锛?, opts: ["鎻愬墠鐪嬪紑锛屼笉鎵х潃锛岀紭鏉ョ紭鍘荤殕鏄┖", "鎷煎敖鍏ㄥ姏鍘荤暀浣忥紝鍝€曟渶鍚庤繕鏄け鍘?, "鎺ュ彈鐜板疄锛屼絾鎶婇偅浠借蹇嗙弽钘忓湪蹇冮噷", "鏃犳硶鎺ュ彈锛屼竴鐩寸棝鑻︺€佷竴鐩磋拷闂€屼负浠€涔堟槸鎴戙€?] },
+  { q: "绗叓棰橈綔鐙鏃朵綘鏈€甯稿仛浠€涔堬紵", opts: ["鍙戝憜銆佽儭鎬濅贡鎯筹紝浜彈娌′汉绠＄殑鐘舵€?, "鍐欎笢瑗裤€佺敾鐢汇€佸仛鎵嬪伐鈥斺€旀妸蹇冮噷鐨勮瘽鍊掑嚭鏉?, "鏁寸悊涓滆タ銆佽鍒掍簨鎯咃紝鎶婄敓娲诲畨鎺掑緱浜曚簳鏈夋潯", "鍙戣劸姘斻€佹憯涓滆タ锛屾妸绉敀鐨勬儏缁噴鏀惧嚭鏉?] },
+  { q: "绗節棰橈綔浣犲鑷繁鏈€涓嶆弧鎰忕殑鍦版柟鏄紵", opts: ["澶蒋寮变簡锛岄亣浜嬫€绘兂韬?, "澶晱鎰熶簡锛屼粈涔堜簨閮藉線蹇冮噷鍘?, "澶畻浜嗭紝鎬诲湪濡ュ崗鍜岄€€璁?, "澶啿鍔ㄤ簡锛屾€绘槸鎶婁簨鎯呮悶鐮?] },
+  { q: "绗崄棰橈綔濡傛灉鍙互閫夛紝浣犲笇鏈涙€庝箞姝伙紵", opts: ["鐪嬬牬浜嗭紝鍑哄锛屽共骞插噣鍑€鍦拌蛋", "涓虹埍鑰屾锛屾寰楀績鐢樻儏鎰?, "鎿嶅姵杩囧害锛屾鍦ㄥ矖浣嶄笂锛屾寰楄桨杞扮儓鐑?, "琚啢鏋夈€佽鏋勯櫡锛屽惈鎭ㄨ€屾"] },
+  { q: "绗崄涓€棰橈綔浣犳渶缇℃厱銆婄孩妤兼ⅵ銆嬮噷鍝釜浜虹墿鐨勭粨灞€锛?, opts: ["瀹濈帀鍑哄鈥斺€旂粓浜庤嚜鐢变簡", "榛涚帀鍘讳笘鈥斺€斾笉鐢ㄥ珌缁欎笉鐖辩殑浜猴紝骞插共鍑€鍑€", "瀹濋挆瀹堝鈥斺€旇櫧鐒跺鐙紝浣嗚耽寰椾簡灏婇噸鍜屼綋闈?, "鏅撮洴琚€愨€斺€斿畞鍙灊澶存姳棣欐锛屼綍鏇惧惞钀藉寳椋庝腑"] },
+  { q: "绗崄浜岄锝滃ぇ瑙傚洯瑕佸畬浜嗭紝浣犳渶鎯冲甫璧颁竴鏍蜂笢瑗匡紝浣犱細閫夛紵", opts: ["涓€鏈瘲闆嗏€斺€旂簿绁炲瘎鎵樻渶閲嶈", "涓€浠跺畾鎯呬俊鐗┾€斺€旈偅鏄埍鐨勮瘉鏄?, "璐︽湰/閽ュ寵鈥斺€旀湁浜嗚繖涓墠鑳介噸鏂板紑濮?, "浠€涔堥兘涓嶅甫锛岃交瑁呬笂闃?] },
+  { q: "绗崄涓夐锝滀綘瑙夊緱浜烘椿鐫€鏈€閲嶈鐨勬槸浠€涔堬紵", opts: ["鐪熸儏鈥斺€旀病鏈夌埍锛屾椿鐫€鏈変粈涔堟剰涔?, "鑷敱鈥斺€斾笉琚换浣曚笢瑗跨粦鏋?, "璐ｄ换鈥斺€旀妸璇ユ墰鐨勬墰璧锋潵", "灏婁弗鈥斺€斿畞鍙珯鐫€姝伙紝涓嶅彲璺潃鐢?] },
+  { q: "绗崄鍥涢锝滃鏋滃彲浠ラ噸鐢熶竴娆★紝浣犳渶鎯虫敼鍙樹粈涔堬紵", opts: ["浠€涔堥兘涓嶆兂鏀瑰彉锛岃繖涓€涓栧氨杩欐牱鍚?, "鎯虫棭鐐归亣鍒伴偅涓噦鎴戠殑浜?, "鎯虫椿寰楁洿鑱槑涓€鐐癸紝涓嶅啀鍚冮偅涔堝浜?, "鎯虫椿寰楁洿鐥涘揩涓€鐐癸紝涓嶅啀蹇嶆皵鍚炲０"] },
+  { q: "绗崄浜旈锝滅敤涓€鍙ヨ瘽褰㈠浣犲鑷繁鍛借繍鐨勬€佸害锛?, opts: ["鍛介噷鏈夋椂缁堥』鏈夛紝鍛介噷鏃犳椂鑾己姹?, "鎴戝懡鐢辨垜涓嶇敱澶╋紝鎷艰繃灏变笉鍚庢倲", "灏戒汉浜嬶紝鍚ぉ鍛斤紝闂績鏃犳劎灏卞ソ", "鍛借繍娆烘垜鍗冨崈涓囷紝鎴戜害璐熷懡杩愬崈涓囬噸"] },
+];
+
+const results = {
+  "璐惧疂鐜?: {
+    title: "璐惧疂鐜?鈥斺€?鍙嶅彌鑰呬笌琚瑙ｇ殑鐪熷績",
+    tags: ["鍙嶅彌", "鐪熸儏", "閫冮伩", "瑙夐啋"],
+    desc: `<h3>馃敭 浣犵殑鐏甸瓊鍏抽敭璇?/h3>
+    <p>鍙嶅彌銆佺湡鎯呫€侀€冮伩銆備綘鍘屾伓涓€鍒囪櫄浼殑瑙勮锛屼笉鎰挎剰娲绘垚鍒汉鏈熷緟鐨勬牱瀛愩€備綘閲嶆儏锛屼絾浣犵殑鎯呮湁鏃跺€欐槸涓€绉嶈蒋寮辩殑娓╂煍鈥斺€斾綘鐪嬪緱瑙佹偛鍓э紝鍗存病鏈夊姏閲忛樆姝㈠畠銆?/p>
+    <div class="quote">"鏃犳潗鍙幓琛ヨ媿澶╋紝鏋夊叆绾㈠皹鑻ヨ骞淬€?</div>
+    <h3>馃挕 浣犵殑鍥板</h3>
+    <p>浣犳渶鎬曠殑涓嶆槸姝讳骸锛岃€屾槸<strong>琚笘淇楀悓鍖?/strong>銆備綘娲诲湪涓€涓姹備綘鎴愪负鍒汉鐨勪笘鐣岄噷锛岃€屼綘鍙兂鎴愪负鑷繁銆傝繖绉嶆媺鎵紝鏄綘姘告亽鐨勭棝鑻︽潵婧愩€?/p>
+    <h3>馃尭 绾㈡ゼ姊﹂噷鐨勪綘</h3>
+    <p>浣犱細鏄ぇ瑙傚洯閲岄偅涓渶娓╂煍涔熸渶鍙涢€嗙殑浜恒€傚濡逛滑鍠滄浣狅紝鍥犱负浣犱粠涓嶆嬁绀兼暀鍘嬭揩濂逛滑锛涢暱杈堜滑澶寸柤浣狅紝鍥犱负浣犳案杩滀笉"涓婅繘"銆備綘鐨勪竴鐢燂紝鏄叧浜?鍋氫竴涓湡浜?鐨勬极闀挎專鎵庛€?/p>`
+  },
+  "鏋楅粵鐜?: {
+    title: "鏋楅粵鐜?鈥斺€?鐢熷湪鍙や唬鐨勭幇浠ｇ伒榄?,
+    tags: ["鏁忔劅", "绾补", "涓讳綋鎬?, "鎮插墽"],
+    desc: `<h3>馃敭 浣犵殑鐏甸瓊鍏抽敭璇?/h3>
+    <p>鏁忔劅銆佺函绮广€佷富浣撴€с€備綘鏈夊畬鏁寸殑鑷垜锛屼笉鎰挎剰琛ㄦ紨锛屼笉鎰挎剰濡ュ崗銆備綘鏈€娓存湜鐨勬槸"琚湡姝ｇ湅瑙?鈥斺€斾笉鏄鍠滄锛岃€屾槸琚悊瑙ｃ€備綘鐨勭棝鑻︽潵鑷簬浣犵殑娓呴啋锛屼綘鐨勬偛鍓ф潵鑷簬浣犵殑涓嶈偗浣庡ご銆?/p>
+    <div class="quote">"鍫€滃拸绲墠"鈥斺€斾綘鐨勬墠鍗庢槸浣犵殑鍏夛紝涔熸槸浣犵殑鏋烽攣銆?/div>
+    <h3>馃挕 浣犵殑鍥板</h3>
+    <p>浣犵殑涓讳綋鎬э紝鍦ㄥ彜浠ｇぞ浼氶噷娌℃湁瀹硅韩涔嬪銆備綘涓嶆効鎰?瑁?锛屼絾杩欎釜涓栫晫濂栧姳鐨勬伆鎭版槸"浼氳"鐨勪汉銆備綘鐨勪竴鐢燂紝鏄湪鐢ㄨ嚜宸辩殑鐪燂紝鍘诲鎶楁暣涓椂浠ｇ殑鍋囥€?/p>
+    <h3>馃尭 绾㈡ゼ姊﹂噷鐨勪綘</h3>
+    <p>浣犱細鏄偅涓湪澶ц鍥钀介噷钁姳銆佸啓璇椼€佹帀鐪兼唱鐨勪汉銆傚埆浜鸿寰椾綘"浣?锛屼絾瀹濈帀鎳備綘銆備綘涓嶉渶瑕佸緢澶氫汉鎳備綘锛屼綘鍙渶瑕佷竴涓汉鐪熸鎳備綘銆傚彲灏辫繛杩欎唤鎳傚緱锛屾渶缁堜篃娌¤兘鎶や綇浣犮€?/p>`
+  },
+  "钖涘疂閽?: {
+    title: "钖涘疂閽?鈥斺€?鍏嬪埗鑰呯殑瀛ょ嫭",
+    tags: ["鍏嬪埗", "鍛ㄥ叏", "鐞嗘€?, "瀛ょ嫭"],
+    desc: `<h3>馃敭 浣犵殑鐏甸瓊鍏抽敭璇?/h3>
+    <p>鍏嬪埗銆佸懆鍏ㄣ€佺悊鎬с€備綘涓嶆槸娌℃湁鑷垜锛岃€屾槸閫夋嫨鎶婅嚜鎴戣棌鍦ㄦ渶鍚堥€傜殑澹抽噷銆備綘鎳傚緱浠€涔堟椂鍊欒杩涖€佷粈涔堟椂鍊欒閫€銆傚埆浜鸿寰椾綘"鍦嗘粦"锛屼絾鍏跺疄浣犲彧鏄瘮浣犺繖涓椂浠ｆ洿鎳傚緱鐢熷瓨鐨勪唬浠枫€?/p>
+    <div class="quote">"浠绘槸鏃犳儏涔熷姩浜?鈥斺€斾綘鍔ㄤ汉鐨勬柟寮忥紝鏄埆浜哄涓嶆潵鐨勫厠鍒躲€?/div>
+    <h3>馃挕 浣犵殑鍥板</h3>
+    <p>浣犳渶澶х殑瀛ょ嫭鏄€斺€?strong>娌℃湁浜虹煡閬撶湡瀹炵殑浣犳槸浠€涔堟牱瀛愮殑</strong>銆備綘澶細"鍋氫汉"浜嗭紝浠ヨ嚦浜庢墍鏈変汉閮戒互涓洪偅灏辨槸浣犮€傚彲閭ｄ釜娣卞鐙嚜鍗镐笅鐩旂敳鐨勪綘锛岃皝鏉ョ湅瑙侊紵</p>
+    <h3>馃尭 绾㈡ゼ姊﹂噷鐨勪綘</h3>
+    <p>浣犱細鏄偅涓墍鏈変汉閮戒緷璧栥€佷絾娌′汉鐪熸璧拌繎鐨勪汉銆備綘鎶婃墍鏈変汉閮界収椤惧緱寰堝ソ锛屽嵈鎶婅嚜宸辩殑闇€瑕佹帓鍦ㄦ渶鍚庛€備綘璧簡涓栫晫锛屼絾閭ｄ釜"璧?瀛楅噷锛屾湁澶氬皯鏄綘鎯宠鐨?涓?锛?/p>`
+  },
+  "鏅撮洴": {
+    title: "鏅撮洴 鈥斺€?涓嶈偗浣庡ご鐨勯攱鍒╃伒榄?,
+    tags: ["鍒氱儓", "鑷皧", "涓嶅眻", "鎮插墽"],
+    desc: `<h3>馃敭 浣犵殑鐏甸瓊鍏抽敭璇?/h3>
+    <p>鍒氱儓銆佽嚜灏娿€佷笉灞堛€備綘鏈€涓嶈兘蹇嶅彈鐨勬槸琚交瑙嗐€備綘瀹佸彲绔欑潃姝伙紝涔熶笉鑲藩鐫€鐢熴€備綘鐨勯攱鍒╂槸浣犵殑淇濇姢灞傦紝浣犵殑楠勫偛鏄綘鐨勮蒋鑲嬨€備綘娲诲緱寰堢棝蹇紝涔熷緢鐭€斺€斿洜涓鸿繖涓椂浠ｅ涓嶄笅澶攱鍒╃殑浜恒€?/p>
+    <div class="quote">"蹇冩瘮澶╅珮锛岃韩涓轰笅璐?鈥斺€斾綘鐨勯珮璐碉紝鏃犲叧韬唤銆?/div>
+    <h3>馃挕 浣犵殑鍥板</h3>
+    <p>浣犳渶澶х殑鏁屼汉涓嶆槸鍒汉锛屾槸浣犺嚜宸辩殑涓嶈偗濡ュ崗銆備綘鐭ラ亾"浣庡ご灏辫兘娲诲緱濂?锛屼絾浣犲氨鏄綆涓嶄笅鍘汇€傝繖浠介獎鍌茶浣犲け鍘讳簡寰堝锛屼絾涔熻浣犳椿鎴愪簡鎵€鏈変汉閮戒笉鏁㈡椿鐨勯偅涓牱瀛愩€?/p>
+    <h3>馃尭 绾㈡ゼ姊﹂噷鐨勪綘</h3>
+    <p>浣犱細鏄偅涓鎵€鏈変汉"鎻愰啋"瑕?鎳備簨"銆佷絾浣犲亸鍋忔渶涓嶆噦浜嬬殑浜恒€備綘鎾曟墖瀛愩€佷綘鎬间汉銆佷綘瀹佸彲鐥呮涔熶笉鑲綆澶存眰楗躲€備綘鐨勪竴鐢熷緢鐭紝浣嗕綘娲荤殑姣忎竴澶╋紝閮芥槸浣犺嚜宸便€?/p>`
+  },
+  "鍙叉箻浜?: {
+    title: "鍙叉箻浜?鈥斺€?鍦ㄤ箰瑙備笌娌ф涔嬮棿",
+    tags: ["璞佽揪", "鐖芥湕", "鍧氶煣", "閫氶€?],
+    desc: `<h3>馃敭 浣犵殑鐏甸瓊鍏抽敭璇?/h3>
+    <p>璞佽揪銆佺埥鏈椼€佸潥闊с€備綘鐪嬩技澶уぇ鍜у挧銆佹病蹇冩病鑲猴紝浣嗗叾瀹炰綘姣旇皝閮芥噦浜烘儏鍐锋殩銆備綘閫夋嫨鐢ㄧ瑧澹版帺鐩栨唱姘达紝涓嶆槸鍥犱负浣犳病鏈夌棝鑻︼紝鑰屾槸鍥犱负浣犱笉鎯宠鐖变綘鐨勪汉鎷呭績銆?/p>
+    <div class="quote">"鑻辫豹闃斿ぇ瀹藉畯閲忥紝浠庢湭灏嗗効濂崇鎯呯暐钀﹀績涓娿€?</div>
+    <h3>馃挕 浣犵殑鍥板</h3>
+    <p>浣犳渶澶х殑娑堣€楋紝鏄?strong>姘歌繙鍦ㄧ収椤惧埆浜虹殑鎯呯华</strong>銆備綘鎶婅嚜宸辩殑鑴嗗急钘忓緱寰堝ソ锛屽ソ鍒拌繛浣犺嚜宸遍兘蹇樹簡瀹冭繕鍦ㄣ€備綘闇€瑕佺殑涓嶆槸"鍧氬己"锛岃€屾槸鍏佽鑷繁鍋跺皵涓嶅潥寮恒€?/p>
+    <h3>馃尭 绾㈡ゼ姊﹂噷鐨勪綘</h3>
+    <p>浣犱細鏄偅涓湪澶ц鍥噷澶х瑧澶ч椆銆?everybody likes you 鐨勪汉銆備絾娣卞浣犱細涓€涓汉鐪嬫湀浜紝鎯抽偅浜涗綘浠庝笉璇村嚭鍙ｇ殑璇濄€備綘鐨勪竴鐢燂紝鏄敤闃冲厜鍘绘俯鏆栬繖涓笘鐣岋紝鍝€曡嚜宸辩殑瑙掕惤鏄槾鐨勩€?/p>`
+  },
+  "鐜嬬啓鍑?: {
+    title: "鐜嬬啓鍑?鈥斺€?鑱槑鍙嶈鑱槑璇殑鎿嶇洏鎵?,
+    tags: ["绮炬槑", "寮哄娍", "鑳藉共", "瀛ょ嫭"],
+    desc: `<h3>馃敭 浣犵殑鐏甸瓊鍏抽敭璇?/h3>
+    <p>绮炬槑銆佸己鍔裤€佽兘骞层€備綘鏄偅涓妸鏁翠釜瀹舵棌鎾戣捣鏉ョ殑浜猴紝浣嗕綘鎾戝緱澶疮浜嗭紝绱埌娌℃湁浜鸿寰椾綘涔熸槸涓渶瑕佽鐓ч【鐨勪汉銆備綘鐭ラ亾鎵€鏈変汉鐨勭瀵嗭紝浣嗕綘鐨勭瀵嗭紝娌℃湁浜虹湡姝ｆ兂鐭ラ亾銆?/p>
+    <div class="quote">"鏈哄叧绠楀敖澶仾鏄庯紝鍙嶇畻浜嗗嵖鍗挎€у懡銆?</div>
+    <h3>馃挕 浣犵殑鍥板</h3>
+    <p>浣犳渶澶х殑鎮插墽鏄€斺€?strong>浣犲お鑳藉共浜嗭紝浠ヨ嚦浜庢墍鏈変汉閮借寰椾綘涓嶉渶瑕佽娓╂煍瀵瑰緟</strong>銆備綘鎶婃墍鏈変汉瀹夋帓寰楁槑鏄庣櫧鐧斤紝浣嗗畨鎺掍笉浜嗚嚜宸辩殑缁撳眬銆?/p>
+    <h3>馃尭 绾㈡ゼ姊﹂噷鐨勪綘</h3>
+    <p>浣犱細鏄偅涓璇濇渶澶у０銆佸姙浜嬫渶鍒╃储銆侀獋浜烘渶鐙犵殑浜恒€備汉浜烘€曚綘锛屼汉浜虹敤浣狅紝浣嗘病鏈変汉鐪熸鐖变綘銆備綘鐨勪竴鐢燂紝鏄竴涓?寮鸿€?鐨勫鐙彶璇椼€?/p>`
+  }
+};
+
+let currentPage = 0;
+let answers = new Array(15).fill(null);
+
+function startTest() {
+  document.getElementById('page-cover').classList.remove('active');
+  buildQuizPages();
+  goToPage(0);
+}
+
+function buildQuizPages() {
+  const container = document.getElementById('quiz-container');
+  questions.forEach((q, i) => {
+    const page = document.createElement('div');
+    page.className = 'page';
+    page.id = 'page-q' + i;
+    page.innerHTML = `
+      <div class="progress-bar"><div class="progress-fill" id="prog-${i}"></div></div>
+      <div class="progress-text">绗?${i+1} / 15 棰?/div>
+      <div class="question-title">${q.q}</div>
+      ${q.opts.map((opt, j) => `
+        <div class="option" id="opt-${i}-${j}" onclick="selectOption(${i}, ${j})">
+          <span class="opt-label">${'ABCD'[j]}</span>${opt}
+        </div>
+      `).join('')}
+      <div class="btn-row">
+        ${i > 0 ? `<button class="btn btn-prev" onclick="goToPage(${i-1})">涓婁竴棰?/button>` : '<div></div>'}
+        ${i < 14 ? `<button class="btn btn-next" id="next-${i}" onclick="goToPage(${i+1})" disabled>涓嬩竴棰?/button>` : `<button class="btn btn-submit" id="next-${i}" onclick="showResult()" disabled>鏌ョ湅缁撴灉</button>`}
+      </div>
+    `;
+    container.appendChild(page);
+  });
+}
+
+function selectOption(qIdx, optIdx) {
+  answers[qIdx] = optIdx;
+  // update UI
+  for (let j = 0; j < 4; j++) {
+    document.getElementById(`opt-${qIdx}-${j}`).classList.remove('selected');
+  }
+  document.getElementById(`opt-${qIdx}-${optIdx}`).classList.add('selected');
+  // enable next/submit
+  document.getElementById(`next-${qIdx}`).disabled = false;
+  // update progress
+  const filled = answers.filter(a => a !== null).length;
+  document.getElementById(`prog-${qIdx}`).style.width = (filled / 15 * 100) + '%';
+}
+
+function goToPage(idx) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (idx === -1) {
+    document.getElementById('page-cover').classList.add('active');
+  } else {
+    const page = document.getElementById('page-q' + idx);
+    page.classList.add('active');
+    currentPage = idx;
+    // restore selection
+    if (answers[idx] !== null) {
+      document.getElementById(`opt-${idx}-${answers[idx]}`).classList.add('selected');
+    }
+  }
+}
+
+function showResult() {
+  // Count answers
+  const counts = { A: 0, B: 0, C: 0, D: 0 };
+  answers.forEach(a => { if (a !== null) counts['ABCD'[a]]++; });
+
+  // Decide character
+  let mainChar = '璐惧疂鐜?;
+  const maxCount = Math.max(counts.A, counts.B, counts.C, counts.D);
+  const maxLetters = Object.keys(counts).filter(k => counts[k] === maxCount);
+
+  // Priority mapping
+  if (maxLetters.includes('A')) {
+    // Check if瀹濈帀 or 鏅撮洴
+    if (counts.D >= 5) mainChar = '鏅撮洴';
+    else if (counts.B >= 5 && counts.A >= 4) mainChar = '鏋楅粵鐜?;
+    else mainChar = '璐惧疂鐜?;
+  }
+  if (maxLetters.includes('B') && !maxLetters.includes('A')) {
+    if (counts.A >= 4) mainChar = '鏋楅粵鐜?;
+    else mainChar = '鏋楅粵鐜?;
+  }
+  if (maxLetters.includes('C') && !maxLetters.includes('A') && !maxLetters.includes('B')) {
+    // 瀹濋挆 or 鐜嬬啓鍑?    if (counts.D >= 4) mainChar = '鐜嬬啓鍑?;
+    else mainChar = '钖涘疂閽?;
+  }
+  if (maxLetters.includes('D') && !maxLetters.includes('A') && !maxLetters.includes('B') && !maxLetters.includes('C')) {
+    if (counts.A >= 4) mainChar = '鏅撮洴';
+    else if (counts.C >= 4) mainChar = '鐜嬬啓鍑?;
+    else mainChar = '鏅撮洴';
+  }
+
+  // Special mixed cases
+  if (counts.A >= 4 && counts.C >= 4) {
+    // 瀹濈帀+瀹濋挆娣峰悎
+    if (counts.B >= 3) mainChar = '鍙叉箻浜?;
+    else mainChar = '钖涘疂閽?;
+  }
+  if (counts.B >= 5 && counts.C >= 4) mainChar = '钖涘疂閽?;
+  if (counts.A >= 3 && counts.D >= 3) mainChar = '鏅撮洴';
+
+  // Show result
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const resultPage = document.getElementById('page-result');
+  resultPage.classList.add('active');
+
+  const r = results[mainChar];
+  document.getElementById('result-content').innerHTML = `
+    <div class="result-character">${mainChar}</div>
+    <div class="result-title">${r.title}</div>
+    <div class="result-tags">${r.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    <div class="result-body">${r.desc}</div>
+    <button class="btn-restart" onclick="restartTest()">閲嶆柊娴嬭瘯</button>
+  `;
+}
+
+function restartTest() {
+  answers = new Array(15).fill(null);
+  currentPage = 0;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-cover').classList.add('active');
+  // reset all options
+  for (let i = 0; i < 15; i++) {
+    for (let j = 0; j < 4; j++) {
+      const el = document.getElementById(`opt-${i}-${j}`);
+      if (el) el.classList.remove('selected');
+    }
+    const btn = document.getElementById(`next-${i}`);
+    if (btn) btn.disabled = true;
+  }
+}
+</script>
+</body>
+</html>
